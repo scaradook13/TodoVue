@@ -5,8 +5,8 @@
             <div class="flex flex-col items-center ">
                 <header class="p-3">
                     <slot name="modal-header">
-
-                    </slot>
+                        
+                    </slot> 
                 </header>
                 <main class="p-3">
                     <slot name="modal-content">

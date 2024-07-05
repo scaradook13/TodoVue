@@ -1,37 +1,16 @@
 <script setup>
-import { ref } from "vue"
-import TodoList from './TodoList.vue';
+import { reactive } from "vue"
+import TodoItem from './TodoItem.vue';
 import Modal from './ModalTemplate.vue'
-const todoTask = defineProps(['listOfTask', 'show'])
-const emit = defineEmits(['addTask', 'toggleTask', 'removeTask', 'toggleModal','updatedForm', 'ShowDelete'])
-const taskInput = ref('')
-const addTask = async () => {
-    const todoForm = {
+import todoFunctions from "@/TodoData/Todo";
+
+const {listOfTask,IsModalShow,addTask,toggleModal} = todoFunctions();
+
+    const newTodo = reactive ({
         id: Math.random(),
-        name: taskInput.value,
+        name: "",
         isCompleted: false,
-    }
-    emit('addTask', todoForm)
-    taskInput.value = ''
-}
-const toggleTaskHandler = (payload) => {
-  emit('toggleTask', payload);
-}
-const removeTaskHandler = (payload) => {
-  emit('removeTask', payload);
-}
-const toggleModal = () => {
-  emit('toggleModal')
-}
-const startEditing = (payload) => {
-  emit('startEditing',payload)
-}
-const updatedForm = (payload, id) => {
-  emit('updatedForm',payload, id)
-}
-const ShowDelete = (payload) => {
-    emit('ShowDelete', payload);
-}
+    })
 </script>
 
 <template>
@@ -42,8 +21,7 @@ const ShowDelete = (payload) => {
       <div v-if="listOfTask.length > 0" class="bg-violet-400 pb-3" >
         <h3 class="pt-3 px-4 font-semibold text-white">Your Task:</h3>
     <ul>
-        <TodoList :listOfTask="listOfTask" @toggleTask="toggleTaskHandler" @removeTask="removeTaskHandler"
-         @startEditing="startEditing" @updatedForm="updatedForm" @ShowDelete="ShowDelete"></TodoList>
+        <TodoItem/>
     </ul>  
       </div>
       <div v-else>
@@ -55,14 +33,14 @@ const ShowDelete = (payload) => {
         <button class="bg-green-500 text-white py-1 px-3 rounded font-semibold" @click="toggleModal">Add Task</button>
         </div>
       </div>
-      <Modal v-if="show">
+      <Modal v-if="IsModalShow">
         <template #modal-header>
         <h3 class="text-lg font-bold">Add New Task</h3>
       </template> 
 
       <!-- Second Slot -->
       <template #modal-content>
-        <input v-model="taskInput" type="text" class="border rounded border-black  px-2">
+        <input v-model="newTodo.name" type="text" class="border rounded border-black  px-2">
       </template>
 
       <!-- Last Slot Action -->
@@ -72,7 +50,7 @@ const ShowDelete = (payload) => {
             <!-- if there is a button in form, it will close the modal -->
             <div class="flex gap-5">
             <button class="bg-red-500 text-white py-1 px-3 rounded font-semibold" @click="toggleModal">Cancel</button>
-            <button class="bg-green-500 text-white py-1 px-3 rounded font-semibold" @click="addTask">Add Task</button>
+            <button class="bg-green-500 text-white py-1 px-3 rounded font-semibold" @click="addTask(newTodo)">Add Task</button>
           </div>
           </form>
         </div>

@@ -1,47 +1,30 @@
 <script setup>
-import { inject,ref } from 'vue';
+import { reactive } from 'vue';
 import Modal from './ModalTemplate.vue';
-const updatedInput = ref('')
-const ModalUpdate = inject('ModalUpdate');
-const IsDeletingTask = inject('DeletingTaskShow')
-const props = defineProps(['id', 'name', 'isCompleted','show'])
-const emit = defineEmits(['toggleTask', 'removeTask', 'startEditing', 'updatedForm','ShowDelete'])
+import todoFunctions from "@/TodoData/Todo";
+const {listOfTask,IsUpdateShow,IsDeletingShow,checkedTask,deleteTask,startEditing,updatedTodo,ShowDelete} = todoFunctions();
 
-const checkedTask = () => {
-    emit('toggleTask', props.id)
-}
-const deleteTask = () => {
-    emit('removeTask', props.id)
-}
-const startEditing = () => {
-    emit('startEditing', props.id)
-}
-const UpdateTask = async () => {
-  const updatedForm = {
-    name: updatedInput.value
-  }
-  emit('updatedForm', updatedForm.name, props.id)
-}
-const deleteTaskshow = () => {
-  emit('ShowDelete', props.id)
-}
+const updateTask = reactive ({
+  name: ''
+})
 </script>
 <template>
+  <section v-for="item in listOfTask" :key="item.id">
     <div class="flex justify-between p-4 bg-violet-600 mx-4 my-3 rounded">
           <div class="flex items-center w-9/12">
-          <input type="checkbox" :checked="props.isCompleted" @change="checkedTask(props.id)">
+          <input type="checkbox" :checked="item.isCompleted" @change="checkedTask(item.id)">
           <div>
-            <p class="pl-5 text-white" @dblclick="startEditing(props.id)">{{ props.name }}</p>
-          </div>
-          <div>
-            <Modal v-if="ModalUpdate === props.id">
+            <p class="pl-5 text-white" @dblclick="startEditing(item.id)">{{ item.name }}</p>
+    </div>
+      <div>
+        <Modal v-if="IsUpdateShow === item.id">
         <template #modal-header>
-        <h3 class="text-lg font-bold">Update task: {{ props.name }}</h3>
+        <h3 class="text-lg font-bold">Update task: {{ item.name }}</h3>
       </template> 
 
       <!-- Second Slot -->
       <template #modal-content>
-        <input v-model="updatedInput" type="text" class="border rounded border-black  px-2">
+        <input v-model="updateTask.name" type="text" class="border rounded border-black  px-2">
       </template>
 
       <!-- Last Slot Action -->
@@ -51,7 +34,7 @@ const deleteTaskshow = () => {
             <!-- if there is a button in form, it will close the modal -->
             <div class="flex gap-5">
             <button class="bg-red-500 text-white py-1 px-3 rounded font-semibold" @click="startEditing">Cancel</button>
-            <button class="bg-green-500 text-white py-1 px-3 rounded font-semibold" @click="UpdateTask(props.id)">Update Task</button>
+            <button class="bg-green-500 text-white py-1 px-3 rounded font-semibold" @click="updatedTodo(updateTask, item.id)">Update Task</button>
           </div>
           </form>
         </div>
@@ -59,10 +42,10 @@ const deleteTaskshow = () => {
       </Modal>
           </div>
       </div>
-          <button v-show="props.isCompleted" @click="deleteTaskshow(props.id)" class="bg-red-500 py-1 px-3 rounded text-white font-semibold">Delete</button>
-          <Modal v-if="IsDeletingTask === props.id">
+          <button v-show="item.isCompleted" @click="ShowDelete(item.id)" class="bg-red-500 py-1 px-3 rounded text-white font-semibold">Delete</button>
+          <Modal v-if="IsDeletingShow === item.id">
         <template #modal-header>
-        <h3 class="text-lg font-bold">Are you sure to delete? {{ props.name }}</h3>
+        <h3 class="text-lg font-bold">Are you sure to delete? {{ item.name }}</h3>
       </template>
       <!-- Last Slot Action -->
       <template #default>
@@ -70,12 +53,13 @@ const deleteTaskshow = () => {
           <form method="dialog">
             <!-- if there is a button in form, it will close the modal -->
             <div class="flex gap-5">
-            <button class="bg-gray-500 text-white py-1 px-3 rounded font-semibold" @click="deleteTaskshow(props.id)">Cancel</button>
-            <button class="bg-red-500 text-white py-1 px-3 rounded font-semibold" @click="deleteTask(props.id)">Delete</button>
+            <button class="bg-gray-500 text-white py-1 px-3 rounded font-semibold" @click="ShowDelete(item.id)">Cancel</button>
+            <button class="bg-red-500 text-white py-1 px-3 rounded font-semibold" @click="deleteTask(item.id)">Delete</button>
           </div>
           </form>
         </div>
       </template>
       </Modal>
     </div>
+  </section>
 </template>
